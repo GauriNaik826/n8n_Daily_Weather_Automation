@@ -1,0 +1,190 @@
+{
+  "name": "Daily Weather Automation",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "triggerAtHour": 16
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        0,
+        0
+      ],
+      "id": "63de7312-93d0-4489-9e74-3726c9e6e7b0",
+      "name": "Schedule Trigger"
+    },
+    {
+      "parameters": {
+        "url": "https://api.openweathermap.org/data/2.5/weather",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "q",
+              "value": "London"
+            },
+            {
+              "name": "units",
+              "value": "metric"
+            },
+            {
+              "name": "appid",
+              "value": "6466f7bb3237f4c3ca6f172135301566"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        208,
+        0
+      ],
+      "id": "e22005af-fdf9-4bca-aa3e-866ddc25a3b8",
+      "name": "HTTP Request"
+    },
+    {
+      "parameters": {
+        "language": "pythonNative",
+        "pythonCode": "for item in _items:\n    data = item[\"json\"]\n\n    city = data[\"name\"]\n    temperature = data[\"main\"][\"temp\"]\n    condition = data[\"weather\"][0][\"description\"].lower()\n    humidity = data[\"main\"][\"humidity\"]\n    wind_speed = data[\"wind\"][\"speed\"]\n  \n\n  \n    if (\"rain\" in condition) or (\"snow\" in condition) or (\"drizzle\" in condition) or (\"storm\" in condition) or (\"thunder\" in condition):\n        alert = \"precipitation\"\n    elif temperature > 32:\n        alert = \"heat\"\n    elif temperature < 0:\n        alert = \"frost\"\n    else:\n        alert = \"none\"\n\n    summary = (\n        f\"Daily Weather - {city}\\n\"\n        f\"Temp: {temperature} °C\\n\"\n        f\"Humidity: {humidity}%\\n\"\n        f\"Wind: {wind_speed} m/s\\n\"\n        f\"Alert: {alert}\"\n    )\n\n    item[\"json\"][\"run_at\"] = \"\"  \n    item[\"json\"][\"city\"] = city\n    item[\"json\"][\"temperature\"] = temperature\n    item[\"json\"][\"temperature_unit\"] = \"C\"\n    item[\"json\"][\"condition\"] = condition\n    item[\"json\"][\"humidity\"] = humidity\n    item[\"json\"][\"wind_speed\"] = wind_speed\n    item[\"json\"][\"alert_type\"] = alert\n    item[\"json\"][\"summary\"] = summary\n\nreturn _items"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        416,
+        0
+      ],
+      "id": "d75502a2-bef5-4067-a5b7-2da1b7784514",
+      "name": "Code in Python (Native)"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://ibgpwoticdmddncvhfse.supabase.co/rest/v1/weather_logs",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "apikey",
+              "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImliZ3B3b3RpY2RtZGRuY3ZoZnNlIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc2NjY5NjcwMSwiZXhwIjoyMDgyMjcyNzAxfQ.atqdiXVaEMvsiiwTHaQMAtLJ1DdRE9hZXUHAgdN7BPM"
+            },
+            {
+              "name": "Authorization",
+              "value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImliZ3B3b3RpY2RtZGRuY3ZoZnNlIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc2NjY5NjcwMSwiZXhwIjoyMDgyMjcyNzAxfQ.atqdiXVaEMvsiiwTHaQMAtLJ1DdRE9hZXUHAgdN7BPM"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "Prefer",
+              "value": "return=representation"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"city\": \"{{$json.city}}\",\n  \"temperature\": {{$json.temperature}},\n  \"temperature_unit\": \"{{$json.temperature_unit}}\",\n  \"condition\": \"{{$json.condition}}\",\n  \"humidity\": {{$json.humidity}},\n  \"wind_speed\": {{$json.wind_speed}},\n  \"alert_type\": \"{{$json.alert_type}}\",\n  \"raw_response\": {{ JSON.stringify($json) }}\n}\n",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        624,
+        0
+      ],
+      "id": "0dfb4859-9a97-4e04-9802-9ca050fc0693",
+      "name": "HTTP Request1"
+    },
+    {
+      "parameters": {
+        "fromEmail": "temp82126@gmail.com",
+        "toEmail": "gnaik826@gmail.com",
+        "subject": "=Daily Weather for {{$json.city}} - {{$now.toFormat(\"yyyy-LL-dd\")}}",
+        "html": "=<h2>☁️ Weather Update</h2>\n<p>Daily weather summary for <b>{{$json.city}}</b> ({{$now.toFormat(\"DDD\")}}):</p>\n\n<ul>\n  <li><b>Temperature:</b> {{$json.temperature}} °{{$json.temperature_unit}}</li>\n  <li><b>Condition:</b> {{$json.condition}}</li>\n  <li><b>Humidity:</b> {{$json.humidity}}%</li>\n  <li><b>Wind:</b> {{$json.wind_speed}} m/s</li>\n  <li><b>Alert:</b> {{$json.alert_type}}</li>\n</ul>\n",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2.1,
+      "position": [
+        832,
+        0
+      ],
+      "id": "f612f191-7fbc-45c7-9d73-fccc4b7c2ee2",
+      "name": "Send email",
+      "webhookId": "9147048c-1697-48e0-99a4-00432510f996",
+      "credentials": {
+        "smtp": {
+          "id": "xnqR4TFlFkoBPZ81",
+          "name": "SMTP account 2"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "Code in Python (Native)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in Python (Native)": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request1": {
+      "main": [
+        [
+          {
+            "node": "Send email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "655a2c1c-95a9-4705-9d60-4377eb1e0384",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "64b3124fd5fd398fbdc430f137e197f3931ca497d56bb741417ad39b7b5607ff"
+  },
+  "id": "7Rxjsz6eVLNzA8lM",
+  "tags": []
+}
