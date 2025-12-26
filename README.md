@@ -8,7 +8,7 @@ The workflow fetches live weather data, formats it into a readable message, and 
 1. OpenWeather API
 - Create an account at: https://openweathermap.org
 - Generate an API key from the dashboard.
-In the n8n HTTP Request node: Method: GET, URL: openweather url, Query Parameters: 
+In the n8n HTTP Request node: Method: GET, URL: openweather url, Query Parameters: |
 | Parameter | Description                                   | Example        |
 |----------|-----------------------------------------------|----------------|
 | `q`      | City name for which weather data is requested | `London`       |
