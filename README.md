@@ -10,14 +10,12 @@ The workflow fetches live weather data, formats it into a readable message, and 
 - Generate an API key from the dashboard.
 In the n8n HTTP Request node: Method: GET, URL: openweather url, Query Parameters: q - City name for which weather data is requested; units - Unit system for temperature (metric = °C); appid - OpenWeather API key   
 
-
-
-URL:
-1. Openwether API- signup and get the Defualt Api key 
-in the http request node, method is GET, URL is the openweather url, in the quey parameters add the q: London , units : etric, appid: API key
-2. Supabase Setup - singu p and create a porject ad then table editir create a table called weather log 
-method is POST in the URL paste the url found in DATA api /rest/v1/weathe_log
-header paremeters - paste the  apikey: APIKEY,  Authorization : Beaeer APIkey , contet type : application/json, Prefer: return=representation, body type add the json bpdy
+2. Supabase Configuration
+- Create a Supabase project.
+- Create a table
+- Use the Data API endpoint provided by Supabase.
+- Add the following headers in the HTTP request:
+apikey: <SUPABASE_API_KEY>; Authorization: Bearer <SUPABASE_API_KEY>; Content-Type: application/json
 
    
 ## 3. Email Configuration
