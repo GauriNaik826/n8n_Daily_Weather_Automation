@@ -19,23 +19,23 @@ apikey: <SUPABASE_API_KEY>; Authorization: Bearer <SUPABASE_API_KEY>; Content-Ty
 
    
 ## 3. Email Configuration
-First setup the SMPTP configuration 
-Email Provider: SendGrid
-SMTP Host: smtp.sendgrid.net
-Port: 587
-Encryption: STARTTLS (enabled)
+1. SMTP Settings
+- Email Provider: SendGrid
+- SMTP Host: smtp.sendgrid.net
+- Port: 587
+- Username: apikey
+- Password: SendGrid API Key
+- Encryption: STARTTLS (enabled)
 
-Authentication :
-Username: apikey
-Password: SendGrid API Key
+3. Sender Setup:
+- A Single Sender Identity was created in SendGrid.
+- The verified sender email is used in the From field in n8n.
+- This ensures successful email delivery and avoids spam rejection.
 
-Sender Setup:
-A Single Sender Identity was created and verified in SendGrid. The verified email address is used as the From Email in n8n.
-
-Email Flow:
-n8n connects to SendGrid using SMTP credentials. Emails are sent via SendGrid to the recipient address. The sender email must match the verified sender in SendGrid. send it via HTML 
-
-✅ This setup ensures secure and reliable email delivery using SendGrid’s SMTP service.
+3. Email Flow:
+- Weather data is fetched from the API.
+- Data is formatted into an HTML email.
+- Email is sent through SendGrid to the specified recipient.
 
 ## 4. How to Import & Run the Workflow
 1. Open n8n
